@@ -16,7 +16,7 @@ $ yarn add offline-sync-handler
 ```ts
 import { OfflineSyncProvider } from 'offline-sync-handler';
 
-const MyApp = ({ Component, pageProps, flagsmithState }) => {
+const MyApp = ({ Component, pageProps }) => {
   return (
     <OfflineSyncProvider>
       <Component {...pageProps} />
@@ -33,23 +33,22 @@ import { useOfflineSyncContext } from 'offline-sync-handler';
 export default const Sample: React.FC = () => {
   const { callApi } = useOfflineSyncContext();
 
-  const submitReview = async () => {
+  const handleSubmit = async () => {
     callApi({
       id: 'Sample',
       body: {
-        user: getCookie('username'),
-        rating,
-        ratingText,
+        user: '',        
       },
       endpoint: 'https://sample.com',
-      method: 'post',
-      authRequired: true,
+      method: 'post'      
     })
       .then(res => {
-        if (res === 'offline') setModaleOpen(true);
+        if (res === 'offline'){
+          // Implement your success code
+        }
       })
       .catch(err => {
-        console.log({ err });
+        // Implement your error code
       });
   };
 
@@ -57,7 +56,7 @@ export default const Sample: React.FC = () => {
     <>
       <Button
         className="sumbit-button"
-        onClick={submitReview}        
+        onClick={handleSubmit}        
       />
     </>
   );
