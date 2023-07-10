@@ -66,6 +66,14 @@ export default const Sample: React.FC = () => {
 export default Feedback;
 ```
 
+## Code of Conduct
+
+<p align="center"><img src="https://media.giphy.com/media/qHRwTyhWIj4UU/200w_d.gif" width=35%></p>
+
+## License
+
+<p align="center"><img src="https://media.giphy.com/media/xUPGcJGy8I928yIlAQ/giphy.gif" width=35%></p>
+
 ## Contribute
 Show your ❤️ and support by giving a ⭐. Any suggestions are welcome! Take a look at the contributing guide.
 
