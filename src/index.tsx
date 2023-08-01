@@ -1,90 +1,71 @@
-import axios from 'axios';
 import React, {
   FC,
   ReactElement,
+  ReactNode,
   useCallback,
   useContext,
   useEffect,
   useState,
 } from 'react';
 import { DataSyncContext } from './data-sync-context';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {
-  RequestObject,
-  getFromLocalForage,
-  offlineChecklist,
-  onlineChecklist,
-  setToLocalForage,
-} from './util';
-import { isNull, omit } from 'underscore';
 
-export const OfflineSyncProvider: FC<{ children: ReactElement }> = ({
-  children,
-}) => {
-  const [data, setData] = useState({});
+import { sendRequest, syncOfflineRequests } from './api-helper';
 
+// Check if window object exists
+const hasWindow = () => {
+  return typeof window !== 'undefined';
+};
+
+export const OfflineSyncProvider: FC<{
+  children: ReactElement;
+  render?: (status: { isOffline?: boolean; isOnline: boolean }) => ReactNode;
+  onStatusChange?: (status: { isOnline: boolean }) => void;
+  toastConfig?: any;
+}> = ({ children, render, onStatusChange, toastConfig }) => {
+  // Manage state for data, offline status, and online status
+  const [data, setData] = useState<Record<string, any>>({});
+  const [isOnline, setIsOnline] = useState<boolean>(
+    window.navigator.onLine ?? true
+  );
+
+  // Add event listeners for online/offline events
   useEffect(() => {
-    window.addEventListener('offline', offlineChecklist);
+    if (!hasWindow()) {
+      return;
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
     return () => {
-      window.removeEventListener('offline', offlineChecklist);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
     };
   }, []);
 
-  const syncOnline = async () => {
-    const appOffline = await getFromLocalForage('appOffline');
-    if (appOffline && navigator.onLine) {
-      onlineChecklist();
-    }
+  // Event handler for online event
+  const handleOnline = useCallback(() => {
+    handleEvent(false);
+    syncOfflineRequests();
+  }, []);
+
+  // Event handler for offline event
+  const handleOffline = () => {
+    handleEvent(true);
   };
 
-  useEffect(() => {
-    syncOnline();
-  }, []);
-
-  const updateData = useCallback((newData: any) => {
-    setData((prev: any) => [...prev, newData]);
-  }, []);
-
-  const callApi = useCallback((payload: any) => {
-    if (navigator.onLine) {
-      const apiObject:RequestObject = {
-        url:payload.url,
-        ...omit(
-        {
-          method: payload.method,
-          data: payload.body,
-          headers: payload.headers,
-          queryParams: payload.queryParams,
-          baseURL: payload.baseURL,
-          params: payload.params,
-          timeout: payload.timeout,
-          responseType: payload.responseType || "json",
-        },
-        function(value) {
-          return isNull(value);
-        }
-      )};
-      //@ts-ignore
-      return axios.request(apiObject);
-    } else {
-      return new Promise(resolve => {
-        appendApi(payload);
-        resolve('offline');
-      });
-    }
-  }, []);
-
-  const appendApi = useCallback(async (newApi: any) => {
-    let offlineSyncData: any =
-      (await getFromLocalForage('offlineSyncData')) || [];
-    offlineSyncData = [...offlineSyncData, newApi];
-    await setToLocalForage('offlineSyncData', offlineSyncData);
-    toast.info('Your data will be sync when we are back online');
-  }, []);
-
+  // Event handler for status change
+  const handleEvent = (isOffline = true) => {
+    const isOnline = !isOffline;
+    onStatusChange?.({ isOnline });
+    setIsOnline(isOnline);
+  };
   return (
-    <DataSyncContext.Provider value={{ data, setData, updateData, callApi }}>
+    <>
+      <DataSyncContext.Provider value={{ data, setData, sendRequest }}>
+        {render?.({ isOnline })}
+        {children}
+      </DataSyncContext.Provider>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -96,12 +77,15 @@ export const OfflineSyncProvider: FC<{ children: ReactElement }> = ({
         draggable
         pauseOnHover
         theme="dark"
+        {...toastConfig}
       />
-      {children}
-    </DataSyncContext.Provider>
+    </>
   );
 };
 
+// Custom hook to access offline sync context
 export const useOfflineSyncContext = () => {
   return useContext(DataSyncContext);
 };
+
+
