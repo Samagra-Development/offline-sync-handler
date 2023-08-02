@@ -13,6 +13,9 @@ $ npm install --save offline-sync-handler
 $ yarn add offline-sync-handler
 ```
 
+## Demo
+   You can find the working demo [here](https://offline-handler-demo.vercel.app)
+
 ## Usage
 
 ### Offline Sync Provider
@@ -55,6 +58,40 @@ try {
   console.error('API Request failed:', error.message);
 }
 
+```
+
+### Passing callback for success 
+
+You can pass a callback function to the request option and it will be triggered once you are connected back to the internet and api is successful.
+
+```javascript
+const { sendRequest } = useOfflineSyncContext();
+
+          // Success Callback 
+          const onSuccess = (response) => {
+            console.log("callback response:",response)
+          };
+        
+          // Function to trigger Post request
+          const makePostRequest = () => {
+            sendRequest({
+              url: "your_url",
+              method: "POST",
+              data: { name, avatar },
+              onSuccess, // callback to be triggered in case of success from offline queue
+            }).then((response) => {
+              console.log({ response});
+            });
+          };
+```
+
+### Clearing offline queue 
+
+You can manually clear the offline sync queue by using `clearStoredRequests` function.
+
+```javascript
+   const { clearStoredRequests } = useOfflineSyncContext();
+   clearStoredRequests()
 ```
 
 ### Passing Custom Component to display during Offline

@@ -11,7 +11,11 @@ import { DataSyncContext } from './data-sync-context';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { sendRequest, syncOfflineRequests } from './api-helper';
+import {
+  sendRequest,
+  syncOfflineRequests,
+  clearStoredRequests,
+} from './api-helper';
 
 // Check if window object exists
 const hasWindow = () => {
@@ -62,7 +66,9 @@ export const OfflineSyncProvider: FC<{
   };
   return (
     <>
-      <DataSyncContext.Provider value={{ data, setData, sendRequest }}>
+      <DataSyncContext.Provider
+        value={{ data, setData, sendRequest, clearStoredRequests }}
+      >
         {render?.({ isOnline })}
         {children}
       </DataSyncContext.Provider>
@@ -87,5 +93,3 @@ export const OfflineSyncProvider: FC<{
 export const useOfflineSyncContext = () => {
   return useContext(DataSyncContext);
 };
-
-
