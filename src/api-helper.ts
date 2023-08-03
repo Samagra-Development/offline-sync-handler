@@ -1,6 +1,5 @@
 import axios from 'axios';
 import localForage from 'localforage';
-import { toast } from 'react-toastify';
 import { addCallBack, triggerCallback } from './callback-util';
 import { omit } from 'underscore';
 
@@ -74,7 +73,7 @@ export const sendRequest = async (config: any) => {
     config.id = generateUuid();
     // Perform the API request and handle retries
     if (!navigator.onLine) {
-      toast.info(
+      alert(
         'You are currently offline. We will automatically resend the request when you are back online.'
       );
     }
@@ -90,7 +89,7 @@ export const syncOfflineRequests = async () => {
     return;
   }
 
-  toast.info(`Back online! Your requests will sync with the server now`);
+  alert(`Back online! Your requests will sync with the server now`);
   for (const request of storedRequests) {
     console.log('ddd:', { storedRequests, request });
     if (request) {

@@ -145,34 +145,52 @@ ReactDOM.render(
 );
 ```
 
-### Customizing Toast Notifications
+### Usage in NextJs
 
-You can customize toast notifications using the `toastConfig` prop of the `OfflineSyncProvider` component. Refer to the `react-toastify` documentation for available options.
+To use this package inside NextJs Application you need to dynamically import the package in the following way:
 
 ```jsx
-import { OfflineSyncProvider } from './offline-sync-provider';
+// _app.tsx
 
-const App = () => {
-  // Your application components and logic
-};
+import { OfflineSyncProvider } from 'offline-sync-handler';
 
-const toastConfig = {
-  position: 'bottom-left',
-  autoClose: 3000,
-};
+export default function App({ Component, pageProps }: AppProps) {
+  const [packageModule, setPackageModule] = useState<{
+    OfflineSyncProvider: any | undefined;
+  }>();
 
-const rootElement = document.getElementById('root');
-ReactDOM.render(
-  <OfflineSyncProvider toastConfig={toastConfig}>
-    <App />
-  </OfflineSyncProvider>,
-  rootElement
-);
+  useEffect(() => {
+    const fetchPackage = async () => {
+      try {
+        const packageModule = await import("offline-sync-handler");
+        setPackageModule(packageModule);
+      } catch (error) {
+        console.error("Error loading the npm package:", error);
+      }
+    };
+
+    fetchPackage();
+  }, []);
+
+  if (packageModule) {
+    return (
+      <packageModule.OfflineSyncProvider>
+        <Component {...pageProps} />
+      </packageModule.OfflineSyncProvider>
+    );
+  }
+
+  return (
+      <Component {...pageProps} />
+  );
+}
+
 ```
 
 ## Roadmaps
 
- * Passing callbacks functions to be triggered on request success/failure.
+ - [x] Passing Success callback functions to be triggered on request success in case of offline.
+ - [ ] Proper NextJs Support.
 
 ## License
 

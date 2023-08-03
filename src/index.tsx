@@ -8,8 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { DataSyncContext } from './data-sync-context';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 import {
   sendRequest,
@@ -19,7 +18,7 @@ import {
 
 // Check if window object exists
 const hasWindow = () => {
-  return typeof window !== 'undefined';
+  return window && typeof window !== 'undefined';
 };
 
 export const OfflineSyncProvider: FC<{
@@ -33,7 +32,7 @@ export const OfflineSyncProvider: FC<{
   const [isOnline, setIsOnline] = useState<boolean>(
     window.navigator.onLine ?? true
   );
-
+console.log({toastConfig})
   // Add event listeners for online/offline events
   useEffect(() => {
     if (!hasWindow()) {
@@ -72,19 +71,7 @@ export const OfflineSyncProvider: FC<{
         {render?.({ isOnline })}
         {children}
       </DataSyncContext.Provider>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        {...toastConfig}
-      />
+     
     </>
   );
 };
