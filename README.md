@@ -14,7 +14,7 @@ $ yarn add offline-sync-handler
 ```
 
 ## Demo
-   You can find the working demo [here](https://offline-handler-demo.vercel.app)
+   You can find the working demo [here](https://sample-nextjs-pwa.vercel.app/)
 
 ## Usage
 
@@ -75,7 +75,7 @@ const App = () => {
 const rootElement = document.getElementById('root');
 ReactDOM.render(
   <OfflineSyncProvider
-    render={({ isOffline, isOnline }) => {
+    render={({ isOnline }) => {
       return isOnline ? null : <div>I am offline</div>;
     }}
   >
@@ -111,34 +111,80 @@ ReactDOM.render(
 );
 ```
 
-### Customizing Toast Notifications
+### Usage with NextJS
 
-You can customize toast notifications using the `toastConfig` prop of the `OfflineSyncProvider` component. Refer to the `react-toastify` documentation for available options.
+You can dynamically import this package to use it with NextJs.
 
 ```jsx
-import { OfflineSyncProvider } from './offline-sync-provider';
+export default function App({ Component, pageProps }: AppProps) {
+  const [packageModule, setPackageModule] = useState<{
+    OfflineSyncProvider: any | undefined;
+  }>();
 
-const App = () => {
-  // Your application components and logic
-};
+  useEffect(() => {
+    const fetchPackage = async () => {
+      try {
+        const packageModule = await import("offline-sync-handler-test");
+        setPackageModule(packageModule);
+      } catch (error) {
+        console.error("Error loading the npm package:", error);
+      }
+    };
+    fetchPackage();
+  }, []);
 
-const toastConfig = {
-  position: 'bottom-left',
-  autoClose: 3000,
-};
+  if (packageModule) {
+    return (
+      <packageModule.OfflineSyncProvider
+        render={renderOffline}
+        onCallback={onCallback}
+      >
+        <>
+          <Component {...pageProps} />
+        </>
+      </packageModule.OfflineSyncProvider>
+    );
+  }
 
-const rootElement = document.getElementById('root');
-ReactDOM.render(
-  <OfflineSyncProvider toastConfig={toastConfig}>
-    <App />
-  </OfflineSyncProvider>,
-  rootElement
-);
+  return (
+    <>
+      <Component {...pageProps} />
+    </>
+  );
+}
+
+```
+
+### Passing request callbacks
+
+You can handle the callback using the `onCallback` prop of the `OfflineSyncProvider`.
+
+```jsx
+
+export default function App({ Component, pageProps }: AppProps) {
+
+  const onCallback = (data: any) => {
+    // your apu success data
+    console.log({data});
+  };
+
+    return (
+      <OfflineSyncProvider
+        onCallback={onCallback}
+      >
+        <>
+          <Component {...pageProps} />
+        </>
+      </OfflineSyncProvider>
+    );
+  }
+
 ```
 
 ## Roadmaps
 
- * Passing callbacks functions to be triggered on request success/failure.
+ - [x] Passing callbacks functions to handle the success callback.
+ - [x] Proper NextJs Support.
 
 ## License
 
