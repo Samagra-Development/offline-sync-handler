@@ -32,9 +32,9 @@ export const OfflineSyncProvider: FC<{
   children: ReactElement;
   render?: (status: { isOffline?: boolean; isOnline: boolean }) => ReactNode;
   onStatusChange?: (status: { isOnline: boolean }) => void;
-  onCallback?: (data: any) => void;
+  onSyncSuccess?: (data: {config:any, data:any}) => void;
   toastConfig?: any;
-}> = ({ children, render, onStatusChange, onCallback }) => {
+}> = ({ children, render, onStatusChange, onSyncSuccess }) => {
   // Manage state for data, offline status, and online status
   const [data, setData] = useState<Record<string, any>>({});
   const [isOnline, setIsOnline] = useState<boolean>(
@@ -91,7 +91,7 @@ export const OfflineSyncProvider: FC<{
     try {
       console.log('perform', { config });
       const response = await api.request(config);
-      onCallback && onCallback({ config, data: response });
+      onSyncSuccess && onSyncSuccess({ config, data: response });
       return response.data;
     } catch (error) {
       if (config.retryCount < RETRY_LIMIT) {

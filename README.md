@@ -137,7 +137,6 @@ export default function App({ Component, pageProps }: AppProps) {
     return (
       <packageModule.OfflineSyncProvider
         render={renderOffline}
-        onCallback={onCallback}
       >
         <>
           <Component {...pageProps} />
@@ -155,22 +154,22 @@ export default function App({ Component, pageProps }: AppProps) {
 
 ```
 
-### Passing request callbacks
+### Passing Sync Success Callback
 
-You can handle the callback using the `onCallback` prop of the `OfflineSyncProvider`.
+You can handle the Sync Success respnse by using the `onSyncSuccess` prop of the `OfflineSyncProvider`.
 
 ```jsx
 
 export default function App({ Component, pageProps }: AppProps) {
 
-  const onCallback = (data: any) => {
-    // your apu success data
-    console.log({data});
+  const onSyncSuccess = (response: any) => {
+    // response consist of config and data where config is the object passed to sendRequest and data is the api response
+    console.log({response});
   };
 
     return (
       <OfflineSyncProvider
-        onCallback={onCallback}
+        onSyncSuccess={onSyncSuccess}
       >
         <>
           <Component {...pageProps} />
