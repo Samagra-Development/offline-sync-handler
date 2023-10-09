@@ -21,6 +21,7 @@ import {
   generateUuid,
   getStoredRequests,
   clearStoredRequests,
+  setStorage,
 } from './api-helper';
 
 // Check if window object exists
@@ -32,7 +33,7 @@ export const OfflineSyncProvider: FC<{
   children: ReactElement;
   render?: (status: { isOffline?: boolean; isOnline: boolean }) => ReactNode;
   onStatusChange?: (status: { isOnline: boolean }) => void;
-  onSyncSuccess?: (data: {config:any, data:any}) => void;
+  onSyncSuccess?: (data: { config: any; data: any }) => void;
   toastConfig?: any;
 }> = ({ children, render, onStatusChange, onSyncSuccess }) => {
   // Manage state for data, offline status, and online status
@@ -129,19 +130,20 @@ export const OfflineSyncProvider: FC<{
       return;
     }
 
-    // alert(`Back online! Your requests will sync with the server now`);
-
+    const requestClone = [...storedRequests];
     for (const request of storedRequests) {
       if (request) {
         try {
           await performRequest(request);
-          await localForage.setItem(
-            API_REQUESTS_STORAGE_KEY,
-            [...storedRequests].filter((sr: any) => sr.id !== request.id)
+          // Remove the request with a matching id from requestClone
+          const updatedRequests = requestClone.filter(
+            sr => sr.id !== request.id
           );
-          //  await localForage.setItem(API_REQUESTS_STORAGE_KEY, [...storedRequests].splice(storedRequests.indexOf(request), [...storedRequests].filter((sr:any)=>sr.id===request.id)?.length || 1 ));
+          requestClone.splice(0, requestClone.length, ...updatedRequests);
         } catch (error) {
           console.log({ error });
+        } finally {
+          await localForage.setItem(API_REQUESTS_STORAGE_KEY, requestClone);
         }
       }
     }
@@ -150,7 +152,14 @@ export const OfflineSyncProvider: FC<{
   return (
     <>
       <DataSyncContext.Provider
-        value={{ data, setData, sendRequest, clearStoredRequests }}
+        value={{
+          data,
+          setData,
+          sendRequest,
+          clearStoredRequests,
+          getStoredRequests,
+          setStorage,
+        }}
       >
         {render?.({ isOnline })}
         {children}
