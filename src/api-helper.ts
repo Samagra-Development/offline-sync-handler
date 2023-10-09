@@ -22,6 +22,13 @@ export const getStoredRequests = async () => {
   }
 };
 
+export const setStorage =async (data:any)=>{
+  try {
+    await localForage.setItem(API_REQUESTS_STORAGE_KEY,data);
+  } catch (error) {
+    console.error('Error setting store :', error);
+  }
+}
 export const clearStoredRequests = async () => {
   try {
     await localForage.removeItem(API_REQUESTS_STORAGE_KEY);
